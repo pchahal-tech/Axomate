@@ -1,0 +1,123 @@
+﻿<Window x:Class="Axomate.UI.SplashScreenWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Axomate – Loading"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Width="700" Height="500"
+        ShowInTaskbar="False"
+        Topmost="True"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        Opacity="0">
+
+    <!-- Fade IN on load -->
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                     From="0" To="1" Duration="0:0:0.30"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <Border Background="#1B2B4A" CornerRadius="12" Padding="20">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="16" ShadowDepth="0" Opacity="0.35"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <!-- image (top half) -->
+                <RowDefinition Height="*"/>
+                <!-- status, progress, dots -->
+                <RowDefinition Height="Auto"/>
+                <!-- footer -->
+            </Grid.RowDefinitions>
+
+            <!-- Splash image fills top half -->
+            <Image Grid.Row="0"
+                   Source="pack://application:,,,/Axomate.UI;component/Assets/Images/Axomate_Splash_800x600.png"
+                   Stretch="UniformToFill"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   VerticalAlignment="Top" Height="314" Grid.RowSpan="2"/>
+
+            <!-- Middle content -->
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="660">
+                <!-- Status -->
+                <TextBlock x:Name="StatusText"
+                           Text="Loading..."
+                           Foreground="White"
+                           FontSize="20"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,12"/>
+
+                <!-- Progress bar -->
+                <ProgressBar x:Name="ProgressBarControl"
+                             Minimum="0" Maximum="100" Value="0"
+                             Height="6" Margin="80,0,80,16"
+                             Foreground="#FFFFFF" Background="#2A3C5E"
+                             BorderThickness="0"/>
+
+                <!-- Tiny animated dots -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Ellipse Width="10" Height="10" Fill="White" Margin="4">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="1" To="0.2" Duration="0:0:0.8"
+                                                         AutoReverse="True" BeginTime="0:0:0" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    <Ellipse Width="10" Height="10" Fill="White" Margin="4">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="1" To="0.2" Duration="0:0:0.8"
+                                                         AutoReverse="True" BeginTime="0:0:0.3" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                    <Ellipse Width="10" Height="10" Fill="White" Margin="4">
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="1" To="0.2" Duration="0:0:0.8"
+                                                         AutoReverse="True" BeginTime="0:0:0.6" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Footer always at bottom -->
+            <TextBlock Grid.Row="2"
+                       x:Name="FooterText"
+                       Foreground="#CFE0FF"
+                       FontSize="12"
+                       Opacity="0.9"
+                       HorizontalAlignment="Center"
+                       Margin="0,12,0,0"
+                       Text=""/>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,35 @@
+﻿<Application x:Class="Axomate.UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
+    <Application.Resources>
+
+        <!-- optional: centralize colors -->
+        <SolidColorBrush x:Key="BtnEnabledBg"  Color="#173A5E"/>
+        <SolidColorBrush x:Key="BtnEnabledFg"  Color="White"/>
+        <SolidColorBrush x:Key="BtnDisabledBg" Color="#E6E6E6"/>
+        <SolidColorBrush x:Key="BtnDisabledFg" Color="#888888"/>
+        <SolidColorBrush x:Key="BtnDisabledBrd" Color="#BDBDBD"/>
+
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="Background" Value="{StaticResource BtnEnabledBg}"/>
+            <Setter Property="Foreground" Value="{StaticResource BtnEnabledFg}"/>
+            <!-- (optional) give a border so disabled state looks crisp -->
+            <Setter Property="BorderBrush" Value="{StaticResource BtnEnabledBg}"/>
+
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background"  Value="{StaticResource BtnDisabledBg}"/>
+                    <Setter Property="Foreground"  Value="{StaticResource BtnDisabledFg}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource BtnDisabledBrd}"/>
+                    <Setter Property="Opacity"     Value="1"/>
+                    <!-- keep crisp; remove if you want faded -->
+                    <Setter Property="Cursor"      Value="Arrow"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Application.Resources>
+</Application>

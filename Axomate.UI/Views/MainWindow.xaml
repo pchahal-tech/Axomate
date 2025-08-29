@@ -1,0 +1,530 @@
+﻿<Window
+    x:Class="Axomate.UI.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:models="clr-namespace:Axomate.Domain.Models;assembly=Axomate.Domain"
+    xmlns:val="clr-namespace:Axomate.UI.Validation"
+    xmlns:views="clr-namespace:Axomate.UI.Views"
+    xmlns:ui="clr-namespace:Axomate.UI"
+    mc:Ignorable="d"
+    Title="Axomate Invoice Generator"
+    WindowStartupLocation="CenterScreen"
+    ResizeMode="CanResize"
+    WindowState="Maximized"
+    Background="#FAFAFA"
+    Icon="/Assets/Images/Axomate_LogoOnly.ico">
+
+    <!-- =================== Resources =================== -->
+    <Window.Resources>
+
+        <!-- Card style for Border -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#E6E6E6"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,20,20"/>
+        </Style>
+
+        <!-- Red border when invalid -->
+        <Style TargetType="TextBox" x:Key="ValidatedTextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <!-- Rounded primary button -->
+        <Style x:Key="RoundedButton" TargetType="Button">
+            <!-- base look -->
+            <Setter Property="Background" Value="#173A5E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Chrome"
+                        CornerRadius="12"
+                        Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Margin="10,4"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Hover (optional) -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#1C4B77"/>
+                            </Trigger>
+
+                            <!-- Pressed (optional) -->
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Chrome" Property="Background" Value="#12395C"/>
+                            </Trigger>
+
+                            <!-- Disabled: make it grey -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Chrome" Property="Background" Value="#E6E6E6"/>
+                                <Setter Property="Foreground" Value="#888888"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                                <!-- keep opacity 1 so text is readable -->
+                                <Setter Property="Opacity" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Label + input stack -->
+        <Style x:Key="LabeledStack" TargetType="StackPanel">
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <!-- Main tabs -->
+            <RowDefinition Height="Auto"/>
+            <!-- Footer -->
+        </Grid.RowDefinitions>
+        <!-- =================== Screens =================== -->
+        <TabControl x:Name="MainTabs"
+            Grid.Row="0"
+            SelectedIndex="0"
+            SelectionChanged="MainTabs_SelectionChanged">
+            <!-- =================== TAB: INVOICE =================== -->
+            <TabItem Header="Invoice">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="20">
+                        <Grid.RowDefinitions>
+                            <!-- Row 0: Company / Customer / Vehicle -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Row 1: Services grid -->
+                            <RowDefinition Height="*"/>
+                            <!-- Row 2: Footer -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*"/>
+                            <ColumnDefinition Width="2.5*"/>
+                            <ColumnDefinition Width="4*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ===== Company ===== -->
+                        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Company.Name}" FontWeight="Bold" FontSize="20"/>
+                                    <TextBlock Text="{Binding Company.Tagline}" FontStyle="Italic" Foreground="Gray" Margin="0,0,0,8"/>
+                                    <TextBlock Text="{Binding Company.AddressLine1}"/>
+                                    <TextBlock Text="{Binding Company.AddressLine2}"/>
+                                    <TextBlock Text="{Binding Company.Phone1}"/>
+                                    <TextBlock Text="{Binding Company.Phone2}"/>
+                                    <TextBlock Text="{Binding Company.Email}"/>
+                                    <TextBlock Text="{Binding Company.Website}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ===== Customer ===== -->
+                        <!-- Customer Section -->
+                        <Border Grid.Row="0" Grid.Column="1" Margin="0 0 20 0" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1" CornerRadius="6" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Customer" FontWeight="Bold" FontSize="16" Margin="0 0 0 10" />
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Select Existing Customer:" Width="150" VerticalAlignment="Center" />
+                                    <ComboBox ItemsSource="{Binding Customers}"
+                                          SelectedItem="{Binding SelectedCustomer}"
+                                          DisplayMemberPath="Name"
+                                          Padding="6" Height="29" Width="250" />
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Name:" Width="150" VerticalAlignment="Center" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="NewCustomer.Name" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Customer}" PropertyName="Name"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Address:" Width="150" VerticalAlignment="Top" />
+                                    <TextBox Text="{Binding NewCustomer.AddressLine1}"
+                                             Padding="6"
+                                             AcceptsReturn="True"
+                                             TextWrapping="Wrap"
+                                             Width="250"
+                                             Height="60" />
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Phone:" Width="150" VerticalAlignment="Center" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="NewCustomer.Phone" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Customer}" PropertyName="Phone"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Email:" Width="150" VerticalAlignment="Center" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="NewCustomer.Email" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Customer}" PropertyName="Email"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+                                <WrapPanel Margin="0 0 0 10">
+                                    <Button Content="Add New Customer"
+                                            Style="{StaticResource RoundedButton}"
+                                            Command="{Binding AddNewCustomerCommand}" />
+
+                                    <Button Content="Save New Customer"
+                                            Margin="8,0,0,0"
+                                            Padding="10,2"
+                                            Style="{StaticResource RoundedButton}"
+                                            Command="{Binding SaveNewCustomerCommand}" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Vehicle Details Section -->
+                        <Border Grid.Row="0" Grid.Column="2" Margin="0" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1" CornerRadius="6" Padding="10">
+                            <StackPanel>
+                                <TextBlock Text="Vehicle Details" FontWeight="Bold" FontSize="16" Margin="0 0 10 10" />
+                                <WrapPanel Margin="0 0 0 15">
+                                    <TextBlock Text="Select Vehicle:" Width="100" VerticalAlignment="Center" />
+                                    <ComboBox ItemsSource="{Binding VehiclesByCustomer}"
+                                              SelectedItem="{Binding SelectedVehicle}"
+                                              DisplayMemberPath="DisplayName"
+                                              Width="300" Height="29" Padding="6"/>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Year:" Width="100" VerticalAlignment="Center" />
+                                    <TextBox Width="250"
+                                         Padding="5"
+                                         Style="{StaticResource ValidatedTextBox}"
+                                         MaxLength="4"
+                                         PreviewTextInput="NumericOnly_PreviewTextInput"
+                                         DataObject.Pasting="NumericOnly_Pasting">
+                                        <TextBox.Text>
+                                            <Binding Path="Vehicle.Year" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged"
+                                                        NotifyOnValidationError="True" ValidatesOnExceptions="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Vehicle}" PropertyName="Year"/>
+                                                    <val:MinYearRule Min="1900"/>
+                                                    <val:NotFutureYearRule/>
+                                                    <ExceptionValidationRule />
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+
+                                    <TextBlock Text="Make:" Width="100" VerticalAlignment="Center" Margin="20,0,0,0" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="Vehicle.Make" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Vehicle}" PropertyName="Make"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Model:" Width="100" VerticalAlignment="Center" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="Vehicle.Model" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Vehicle}" PropertyName="Model"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+
+                                    <TextBlock Text="License Plate:" Width="100" VerticalAlignment="Center" Margin="20,0,0,0" />
+                                    <TextBox Width="250" Padding="5" MaxLength="20" CharacterCasing="Upper" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="Vehicle.LicensePlate" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Vehicle}" PropertyName="LicensePlate"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Color:" Width="100" VerticalAlignment="Center" />
+                                    <TextBox Text="{Binding Vehicle.Color}" Width="250" Padding="5"/>
+
+                                    <TextBlock Text="VIN:" Width="100" VerticalAlignment="Center" Margin="20,0,0,0" />
+                                    <TextBox Width="250" Padding="5" MaxLength="17" CharacterCasing="Upper" Style="{StaticResource ValidatedTextBox}">
+                                        <TextBox.Text>
+                                            <Binding Path="Vehicle.VIN" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                                                <Binding.ValidationRules>
+                                                    <val:DataAnnotationsRule SourceType="{x:Type models:Vehicle}" PropertyName="VIN"/>
+                                                </Binding.ValidationRules>
+                                            </Binding>
+                                        </TextBox.Text>
+                                    </TextBox>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 5">
+                                    <TextBlock Text="Engine:" Width="100" VerticalAlignment="Center" />
+                                    <TextBox Text="{Binding Vehicle.Engine}" Width="250" Padding="5"/>
+                                    <TextBlock Text="Transmission:" Width="100" VerticalAlignment="Center" Margin="20,0,0,0" />
+                                    <ComboBox SelectedValuePath="Content" SelectedValue="{Binding Vehicle.Transmission, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            Width="200" Margin="0,2,0,0">
+                                        <ComboBoxItem Content="Automatic"/>
+                                        <ComboBoxItem Content="Manual"/>
+                                    </ComboBox>
+                                </WrapPanel>
+
+                                <WrapPanel Margin="0 0 0 10">
+                                    <TextBlock Text="Fuel Type:" Width="100" VerticalAlignment="Center" />
+                                    <ComboBox  SelectedValuePath="Content" SelectedValue="{Binding Vehicle.FuelType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Width="250" Margin="0,2,0,0">
+                                        <ComboBoxItem Content="Gasoline"/>
+                                        <ComboBoxItem Content="Diesel"/>
+                                        <ComboBoxItem Content="Electric"/>
+                                        <ComboBoxItem Content="Hybrid"/>
+                                    </ComboBox>
+                                    <TextBlock Text="Mileage(kms):" Width="100" VerticalAlignment="Center" Margin="20,0,0,0" />
+                                    <TextBox Width="250" Padding="5" Style="{StaticResource ValidatedTextBox}"
+                                             PreviewTextInput="NumericOnly_PreviewTextInput"
+                                             DataObject.Pasting="NumericOnly_Pasting"
+                                             ToolTip="Enter mileage reading (numbers only)" 
+                                             Text="{Binding Mileage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}">
+                                    </TextBox>
+                                </WrapPanel>
+                                <WrapPanel Margin="0 0 0 10">
+                                    <Button  Content="Add New Vehicle" Style="{StaticResource RoundedButton}" Command="{Binding AddNewVehicleCommand}" ToolTip="Start a new vehicle for this customer" />
+                                    <Button Content="Save New Vehicle" Margin="8,0,0,0" Padding="10,2" Style="{StaticResource RoundedButton}" Command="{Binding SaveNewVehicleCommand}" IsEnabled="{Binding NewVehicleMode}" ToolTip="Save a new vehicle for this customer" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ===== Services (selector + grid) ===== -->
+                        <Border Grid.Row="1" Grid.ColumnSpan="3" Style="{StaticResource Card}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Add service -->
+                                <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,8">
+                                    <TextBlock Text="Service Date:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <DatePicker SelectedDate="{Binding ServiceDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                 Width="150" Margin="0,0,12,0"/>
+
+                                    <TextBlock Text="Add Service:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <ComboBox Width="420"
+                                          ItemsSource="{Binding AvailableServiceItems}"
+                                          SelectedItem="{Binding SelectedServiceItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                          IsTextSearchEnabled="True"
+                                          TextSearch.TextPath="Name">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" Margin="0,0,8,0"/>
+                                                    <TextBlock Text="{Binding Price, StringFormat=C}"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+
+                                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                                        <TextBlock Text="Total:" VerticalAlignment="Center" Margin="12,0,6,0" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding InvoiceTotal, StringFormat=C}" VerticalAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                                    </StackPanel>
+
+                                </DockPanel>
+
+                                <!-- Line items grid -->
+                                <DataGrid Grid.Row="1"
+                                        ItemsSource="{Binding SelectedServices}"
+                                        AutoGenerateColumns="False"
+                                        CanUserAddRows="False"
+                                        HeadersVisibility="Column"
+                                        IsReadOnly="False">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Service" Binding="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                        <DataGridTextColumn Header="Price" Binding="{Binding Price, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, StringFormat=F2}" Width="120"/>
+                                        <DataGridTextColumn Header="Qty" Binding="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                                        <DataGridTemplateColumn Header="Remove" Width="90">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="Delete"
+                                                        Command="{Binding DataContext.RemoveServiceItemCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                        CommandParameter="{Binding}"
+                                                        Padding="8,4"
+                                                        Background="#E53935" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <!-- ===== Footer buttons ===== -->
+                        <StackPanel Grid.Row="2" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                            <Button Content="New Invoice" Style="{StaticResource RoundedButton}" Command="{Binding CreateNewInvoiceCommand}"  ToolTip="Start a new invoice" />
+                            <Button  Content="Reset" Style="{StaticResource RoundedButton}" Command="{Binding ResetFormCommand}"/>
+                            <Button  Content="Print Invoice" Style="{StaticResource RoundedButton}" Command="{Binding PrintInvoiceCommand}"/>
+                            <Button Content="Save and Print Invoice" Style="{StaticResource RoundedButton}" Command="{Binding SaveAndPrintInvoiceCommand}"/>
+                            <Button Content="Close"  Style="{StaticResource RoundedButton}" Command="{Binding CloseAppCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" />
+                        </StackPanel>
+                    </Grid>
+                </ScrollViewer>
+
+            </TabItem>
+
+            <!-- =================== TAB: SERVICE HISTORY =================== -->
+            <TabItem Header="Service History" Height="20" VerticalAlignment="Bottom">
+                <Grid Margin="20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Customer / Vehicle pickers (auto-load on selection) -->
+                    <DockPanel Grid.Row="0" LastChildFill="False" Margin="0,0,0,8">
+                        <!-- Left: Pickers -->
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="0,0,12,0">
+                            <TextBlock Text="Customer:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <ComboBox ItemsSource="{Binding Customers}"
+                                      SelectedItem="{Binding SelectedHistoryCustomer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="Name"
+                                      Width="220" Height="28" Padding="4" />
+                            <TextBlock Text="Vehicle:" VerticalAlignment="Center" Margin="12,0,6,0"/>
+                            <ComboBox ItemsSource="{Binding HistoryVehiclesByCustomer}"
+                                      SelectedItem="{Binding SelectedHistoryVehicle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      DisplayMemberPath="DisplayName"
+                                      Width="260" Height="28" Padding="4" />
+                        </StackPanel>
+
+                    </DockPanel>
+
+                    <!-- Row 1: Date range + All-by-date button -->
+                    <DockPanel Grid.Row="1" LastChildFill="False" Margin="0,0,0,8">
+                        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="0,0,12,0">
+                            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <DatePicker SelectedDate="{Binding HistoryFromDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="150"/>
+                            <TextBlock Text="To:" VerticalAlignment="Center" Margin="12,0,6,0"/>
+                            <DatePicker SelectedDate="{Binding HistoryToDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Width="150"/>
+                        </StackPanel>
+
+                        <Button Content="Load (All Customers &amp; Vehicles)"
+                                Style="{StaticResource RoundedButton}"
+                                Command="{Binding LoadServiceHistoryByDateRangeCommand}"
+                                ToolTip="Clear Customer and Vehicle to enable; then pick From and To dates"
+                                Height="28"
+                                HorizontalAlignment="Right" />
+                    </DockPanel>
+
+                    <!-- Row 2: History grid -->
+                    <DataGrid Grid.Row="2"
+                              ItemsSource="{Binding ServiceHistory}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Date" Binding="{Binding ServiceDate, StringFormat=\{0:yyyy-MM-dd\}}"  Width="120"/>   
+                            <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}"  Width="220"/>
+                            <DataGridTextColumn Header="Vehicle"  Binding="{Binding VehicleDisplay}" Width="260"/>
+                            <DataGridTextColumn Header="Mileage"  Binding="{Binding Mileage}" Width="100"/>
+                            <DataGridTextColumn Header="Services" Binding="{Binding ItemsSummary}"  Width="*"/>
+                            <DataGridTextColumn Header="Total"    Binding="{Binding Total, StringFormat=C}" Width="120"/>
+                            <DataGridTextColumn Header="Invoice #" Binding="{Binding InvoiceId}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- =================== TAB: ADMIN PANEL =================== -->
+            <TabItem x:Name="AdminTab" Header="Admin">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Admin header actions shown ON the Admin screen -->
+                    <StackPanel Orientation="Horizontal"
+                        Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        Margin="0,8,8,8">
+                        <!-- Button is always visible but only enabled when unlocked -->
+                        <Button Content="Change Admin Password"
+                        Command="{Binding ChangeAdminPasswordCommand}"
+                        IsEnabled="{Binding IsAdminUnlocked}"
+                        Padding="12,8"
+                        Margin="0,0,8,0"/>
+                        <Button Content="Lock"
+                        Command="{Binding LockAdminCommand}"
+                        IsEnabled="{Binding IsAdminUnlocked}"
+                        Padding="12,8"/>
+                    </StackPanel>
+
+                    <views:AdminPanel Grid.Row="1"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <!-- =================== Footer (shows on all tabs) =================== -->
+        <Border Grid.Row="1"
+                Background="#EEEEEE"
+                Padding="5">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <TextBlock Text="© 2025 AAAHAR Software Services Inc."
+                           Margin="0,0,12,0"
+                           Foreground="Gray"
+                           FontSize="12"/>
+                <TextBlock Text="•"
+                           Margin="0,0,12,0"
+                           Foreground="Gray"
+                           FontSize="12"/>  
+                <TextBlock FontSize="12" Foreground="Gray">
+                    <Run Text="Version "/>
+                    <Run Text="{x:Static ui:AppInfo.Version}"/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

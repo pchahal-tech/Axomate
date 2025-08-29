@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net8.0-windows7.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <DefineConstants>USE_DEMO_FLOW</DefineConstants>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+  </ItemGroup>
+
+  <!-- Only the Windows target references the WPF UI -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0-windows7.0'">
+    <ProjectReference Include="..\Axomate.UI\Axomate.UI.csproj" />
+  </ItemGroup>
+
+  <!-- If the adapter touches WPF types, exclude it on plain net8.0 -->
+  <ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
+    <Compile Remove="Adapters\MainFlowAdapter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Axomate.Infrastructure\Axomate.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

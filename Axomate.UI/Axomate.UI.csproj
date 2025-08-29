@@ -1,0 +1,74 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- WPF executable -->
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+
+    <!-- Target platforms -->
+    <Platforms>AnyCPU;x64</Platforms>
+
+    <!-- Framework-dependent build -->
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <!-- Axomate.UI.csproj -->
+  <PropertyGroup>
+    <ApplicationIcon>Axomate.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- Apply RID only for Release|x64 so we get an EXE -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <!-- Disable Binder source generator -->
+  <PropertyGroup>
+    <EnableConfigurationBindingGenerator>false</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
+  <!-- Ensure appsettings.json is copied -->
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Embedded resources -->
+  <ItemGroup>
+    <None Remove="Assets\Images\Axomate_LogoOnly.ico" />
+    <None Remove="Assets\Images\Axomate_Splash_800x600.png" />
+    <Resource Include="Assets\Images\Axomate_LogoOnly.ico" />
+    <Resource Include="Assets\Images\Axomate_Splash_800x600.png" />
+  </ItemGroup>
+
+  <!-- NuGet dependencies -->
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+  </ItemGroup>
+
+  <!-- Project references -->
+  <ItemGroup>
+    <ProjectReference Include="..\Axomate.ApplicationLayer\Axomate.ApplicationLayer.csproj" />
+    <ProjectReference Include="..\Axomate.Domain\Axomate.Domain.csproj" />
+    <ProjectReference Include="..\Axomate.Infrastructure\Axomate.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Axomate.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
